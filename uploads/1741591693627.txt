@@ -1,0 +1,30 @@
+User Side Database(Table):
+-> Basic Information:
+	=> Name
+	=> Designation/Position
+	=> Profile Pic
+	=> Email Address - Password
+	=> Gender
+	=> Phone Number
+	=> Location
+	=> Website
+
+-> Experiences:
+	=> Designation/Position
+	=> Comapany Name
+	=> Location, Duration(From - To)
+	=> Description
+
+-> Education/Certificates:
+	=> Institution/University
+	=> Course Name
+	=> Grade, Duration(From - To)
+	=> Description
+
+-> Skills:
+	=> Skill Name
+	=> Level of Expertise
+
+-> Attachments:
+	=> File 
+	
