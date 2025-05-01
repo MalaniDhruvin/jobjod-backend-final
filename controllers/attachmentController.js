@@ -1,5 +1,6 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const Attachment = require("../models/attachmentModel");
 const Portfolio = require("../models/portfolioModel");
 const sequelize = require("../config/db");
@@ -84,7 +85,7 @@ exports.getProfile = async (req, res) => {
     }
 
     // Get Resume File
-    const attachment = await Attachment.findOne({ where: { userId } });
+    const attachment = await Attachment.findAll({ where: { userId } });
 
     // Get Portfolio Links
     const portfolio = await Portfolio.findOne({ where: { userId } });
@@ -163,5 +164,40 @@ exports.deletePortfolioLink = async (req, res) => {
   } catch (error) {
     console.error("Error:", error.message); // Log detailed error message
     res.status(500).json({ message: error.message });
+  }
+};
+
+exports.downloadAttachment = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const attachment = await Attachment.findByPk(id);
+    if (!attachment) {
+      return res.status(404).json({ message: "Attachment not found" });
+    }
+
+    // filePath was set in createOrUpdateProfile to something like 'uploads/<timestamp>.pdf'
+    const fileOnDisk = path.resolve(__dirname, "..", attachment.filePath);
+    if (!fs.existsSync(fileOnDisk)) {
+      return res.status(404).json({ message: "File not found on disk" });
+    }
+
+    // Stream it as a download, using the original client filename
+    return res.download(
+      fileOnDisk,
+      attachment.fileName,       // this is the original name, e.g. 'resume.pdf'
+      (err) => {
+        if (err) {
+          console.error("Download error:", err);
+          // NOTE: headers may already be sent
+          if (!res.headersSent) {
+            res.status(500).end();
+          }
+        }
+      }
+    );
+  } catch (err) {
+    console.error("Download error:", err);
+    res.status(500).json({ message: err.message });
   }
 };

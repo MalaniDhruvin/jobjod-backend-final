@@ -63,17 +63,28 @@ exports.updatePreference = async (req, res) => {
 
 // Delete Preference
 exports.deletePreference = async (req, res) => {
-  try {
-    const preference = await Preference.destroy({
-      where: { id: req.params.id },
-    });
+  const { field } = req.body;
+  // whitelist allowed preference‐columns
+  const allowed = ["employmentType", "location", "shift", "workplace"];
+  if (!allowed.includes(field)) {
+    return res.status(400).json({ message: "Invalid field name" });
+  }
 
-    if (!preference) {
+  try {
+    // set that one column to empty string
+    const [updatedCount] = await Preference.update(
+      { [field]: "" },
+      { where: { id: req.params.id } }
+    );
+
+    if (!updatedCount) {
       return res.status(404).json({ message: "Preference not found" });
     }
 
-    res.status(200).json({ message: "Preference deleted successfully" });
+    res.status(200).json({ message: `${field} cleared successfully` });
   } catch (error) {
+    console.error("Error clearing preference field:", error);
     res.status(500).json({ message: error.message });
   }
 };
+

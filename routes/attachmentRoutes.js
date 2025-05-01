@@ -6,6 +6,7 @@ const {
   updatePortfolio,
   deleteResume,
   deletePortfolioLink,
+  downloadAttachment
 } = require("../controllers/attachmentController");
 
 const authMiddleware = require("../middleware/authMiddleware"); // Use the authentication middleware
@@ -24,5 +25,7 @@ router.delete("/resume/:id", authMiddleware, deleteResume); // DELETE resume by 
 
 // Route to delete a portfolio link
 router.delete("/portfolio/:id", authMiddleware, deletePortfolioLink); // DELETE portfolio link by ID
+
+router.get("/:id/download", downloadAttachment);
 
 module.exports = router;

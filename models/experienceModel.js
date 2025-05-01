@@ -20,10 +20,11 @@ const Experience = sequelize.define(
     jobTitle: { type: DataTypes.STRING, allowNull: false },
     industry: { type: DataTypes.STRING, allowNull: false },
     department: { type: DataTypes.STRING, allowNull: false },
-    startDate: { type: DataTypes.DATEONLY, allowNull: false },
-    endDate: { type: DataTypes.DATEONLY, allowNull: false },
+    startDate: { type: DataTypes.STRING, allowNull: false },
+    endDate: { type: DataTypes.STRING, allowNull: false },
     employmentType: { type: DataTypes.STRING, allowNull: false },
     salary: { type: DataTypes.INTEGER, allowNull: false },
+    description: { type: DataTypes.STRING, allowNull: false },
   },
   {
     timestamps: true, // Store createdAt and updatedAt automatically

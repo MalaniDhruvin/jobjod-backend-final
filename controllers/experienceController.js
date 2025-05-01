@@ -22,7 +22,7 @@ exports.getExperiencesForLoggedInUser = async (req, res) => {
 
   try {
     // Fetch experiences based on the logged-in user's userId
-    const experiences = await Experience.findAll({ _id: userId });
+    const experiences = await Experience.findAll({where:{userId} });
 
     if (!experiences.length) {
       return res

@@ -24,10 +24,25 @@ exports.createSkills = async (req, res) => {
 };
 
 exports.createSkill = async (req, res) => {
+  const { userId, skills } = req.body;
+
+  console.log(userId, skills);
+
+  if (!userId || !Array.isArray(skills) || skills.length === 0) {
+    return res.status(400).json({ error: "Invalid data" });
+  }
+
   try {
+    // Insert multiple skills into the database using bulkCreate
+    const skillEntries = skills.map(( {name, level, rating}) => ({ userId, skill: name,
+            level,
+           rating, }));
+
+          //  console.log(skillEntries)
+
     // Bulk create skills
-    await Skill.create(req.body);
-    res.status(201).json({ message: "Skills saved successfully" });
+    const created = await Skill.bulkCreate(skillEntries);
+   res.status(201).json(created);
   } catch (err) {
     console.error("Error inserting skills:", err);
     res.status(500).json({ error: "Failed to insert skills" });
@@ -39,7 +54,8 @@ exports.getSpecificData = async (req, res) => {
 
   try {
     // Fetch user data from the database by the provided ID
-    const userData = await Skill.findAll({ _id: userId });
+    const userData = await Skill.findAll({ where:{ userId} });
+console.log('User data fetched:', userData);
 
     // console.log(userData);
 
@@ -78,23 +94,31 @@ exports.getAllSkills = async (req, res) => {
 
 // Update Skill
 exports.updateSkill = async (req, res) => {
-  const { userId, skill } = req.body;
+  const { userId, skills } = req.body; // Expecting skills array
+
   try {
-    const skills = await Skill.findOne(req.userId);
-    if (!skills) {
-      return res.status(404).json({ message: "User not found" });
+    const existing = await Skill.findByPk(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ message: "Skill not found" });
     }
 
-    // Update the user's information (excluding password)
-    const updatedSkill = await skills.update({
+    const { name, level, rating } = skills[0]; // Take first skill object
+
+    // Update the skill
+    const updated = await existing.update({
       userId,
-      skill,
+      skill: name,
+      level,
+      rating
     });
-    res.status(200).json(updatedSkill);
+
+    res.status(200).json(updated);
   } catch (error) {
+    console.error("Error updating skill:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Delete Skill
 exports.deleteSkill = async (req, res) => {

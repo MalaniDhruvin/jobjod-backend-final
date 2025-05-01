@@ -104,7 +104,7 @@ exports.getSpecificData = async (req, res) => {
 // Get user data (after validating JWT token)
 exports.getData = async (req, res) => {
   try {
-    const user = await User.findOne(req.userId);
+    const user = await User.findOne({where:{userId:req.userId}});
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -128,7 +128,7 @@ exports.updateUser = async (req, res) => {
   } = req.body;
 
   try {
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ where: { userId }});
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -151,7 +151,7 @@ exports.updateUser = async (req, res) => {
 // Delete user account
 exports.deleteUser = async (req, res) => {
   try {
-    const user = await User.findOne(req.userId);
+    const user = await User.findOne({where:{userId:req.userId}});
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
