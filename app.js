@@ -15,6 +15,7 @@ const loginRoutes = require("./routes/loginRoutes");
 const certificationRoutes = require("./routes/certificationRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 app.use(express.json());
 app.use(cors());
@@ -29,6 +30,7 @@ app.use("/api/preferences", preferenceRoutes); // Protected routes for preferenc
 app.use("/api/certifications", certificationRoutes); // Protected routes for certifications
 app.use("/api/applications", applicationRoutes);
 app.use("/api/messages", messageRoutes); // Protected routes for messages
+app.use("/api/notifications", notificationRoutes); // Protected routes for notifications
 
 // Sync database
 

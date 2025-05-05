@@ -7,6 +7,7 @@ const {
   getSpecificData,
   updateSkill,
   deleteSkill,
+  matchJobSkills
 } = require("../controllers/skillController");
 const authMiddleware = require("../middleware/authMiddleware"); // Use the authentication middleware
 
@@ -17,5 +18,6 @@ router.get("/", authMiddleware, getAllSkills); // Get all Skills (requires login
 router.get("/:userId", getSpecificData); // GET user data
 router.put("/:id", authMiddleware, updateSkill); // Update Skill (requires login)
 router.delete("/:id", authMiddleware, deleteSkill); // Delete Skill (requires login)
+router.post("/match", matchJobSkills); // Match Job Skills (requires login)
 
 module.exports = router;

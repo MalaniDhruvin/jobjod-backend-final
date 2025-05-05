@@ -34,15 +34,18 @@ exports.createSkill = async (req, res) => {
 
   try {
     // Insert multiple skills into the database using bulkCreate
-    const skillEntries = skills.map(( {name, level, rating}) => ({ userId, skill: name,
-            level,
-           rating, }));
+    const skillEntries = skills.map(({ name, level, rating }) => ({
+      userId,
+      skill: name,
+      level,
+      rating,
+    }));
 
-          //  console.log(skillEntries)
+    //  console.log(skillEntries)
 
     // Bulk create skills
     const created = await Skill.bulkCreate(skillEntries);
-   res.status(201).json(created);
+    res.status(201).json(created);
   } catch (err) {
     console.error("Error inserting skills:", err);
     res.status(500).json({ error: "Failed to insert skills" });
@@ -54,8 +57,8 @@ exports.getSpecificData = async (req, res) => {
 
   try {
     // Fetch user data from the database by the provided ID
-    const userData = await Skill.findAll({ where:{ userId} });
-console.log('User data fetched:', userData);
+    const userData = await Skill.findAll({ where: { userId } });
+    console.log("User data fetched:", userData);
 
     // console.log(userData);
 
@@ -109,7 +112,7 @@ exports.updateSkill = async (req, res) => {
       userId,
       skill: name,
       level,
-      rating
+      rating,
     });
 
     res.status(200).json(updated);
@@ -118,7 +121,6 @@ exports.updateSkill = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // Delete Skill
 exports.deleteSkill = async (req, res) => {
@@ -129,5 +131,65 @@ exports.deleteSkill = async (req, res) => {
     res.status(200).json({ message: "Skill deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+exports.matchJobSkills = async (req, res) => {
+  let { jobSkills } = req.body;
+
+  // console.log("Job skills input:", jobSkills);
+
+  // 1️⃣ Normalize jobSkills to array of lowercase strings
+  let required = [];
+  if (typeof jobSkills === "string") {
+    required = jobSkills.split(",").map((s) => s.trim().toLowerCase());
+  } else if (Array.isArray(jobSkills)) {
+    required = jobSkills
+      .filter((s) => typeof s === "string")
+      .map((s) => s.trim().toLowerCase());
+  } else {
+    return res
+      .status(400)
+      .json({
+        message:
+          "Invalid data. Expect jobSkills as string or array of strings.",
+      });
+  }
+  required = required.filter(Boolean);
+
+  try {
+    // 2️⃣ Fetch all user skills
+    const userEntries = await Skill.findAll();
+
+    // 3️⃣ Group skills by userId
+    const skillsByUser = userEntries.reduce((acc, { userId, skill }) => {
+      const name = skill.trim().toLowerCase();
+      if (!acc[userId]) acc[userId] = new Set();
+      acc[userId].add(name);
+      return acc;
+    }, {});
+
+    // console.log("Skills by user:", skillsByUser);
+
+    // 4️⃣ Build result for each user
+    const matches = Object.entries(skillsByUser).map(([uid, skillSet]) => {
+      // find overlapping skills
+      const matchedSkills = required.filter((skill) => skillSet.has(skill));
+      const matchCount = matchedSkills.length;
+      const isMatch = matchCount >= 1;
+
+      return {
+        userId: parseInt(uid, 10),
+        match: isMatch ? "yes" : "no",
+        matchCount,
+        matchedSkills,
+      };
+    });
+
+    // 5️⃣ Return all user matches
+    return res.status(200).json({ matches });
+  } catch (error) {
+    console.error("Error matching job skills:", error);
+    return res.status(500).json({ message: "Failed to match job skills" });
   }
 };

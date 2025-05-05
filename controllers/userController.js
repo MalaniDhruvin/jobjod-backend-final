@@ -104,7 +104,7 @@ exports.getSpecificData = async (req, res) => {
 // Get user data (after validating JWT token)
 exports.getData = async (req, res) => {
   try {
-    const user = await User.findOne({where:{userId:req.userId}});
+    const user = await User.findAll();
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -202,7 +202,7 @@ exports.getAppliedFor = async (req, res) => {
 
   try {
     // Fetch the user by primary key
-    const user = await User.findByPk(userId);
+    const user = await User.findOne({where:{userId}});
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -252,7 +252,7 @@ exports.getUsersAppliedForJob = async (req, res) => {
     // 1️⃣ Fetch users whose appliedFor array contains this jobId
     const users = await User.findAll({
       // include the JSON column so we can read it in JS
-      attributes: ['id', 'fullName', 'email','phone', 'appliedFor'],
+      attributes: ['id', 'fullName', 'email','phone', 'appliedFor','updatedAt'],
       where: literal(
         `JSON_SEARCH(appliedFor, 'one', '${jobId}', NULL, '$[*].id') IS NOT NULL`
       )
@@ -278,7 +278,8 @@ exports.getUsersAppliedForJob = async (req, res) => {
         email: u.email,
         // 3️⃣ pluck appliedOn (or null if missing)
         appliedOn: appliedForEntry ? appliedForEntry.appliedOn : null,
-        status: appliedForEntry ? appliedForEntry.status : null
+        status: appliedForEntry ? appliedForEntry.status : null,
+        updatedAt: u.updatedAt,
       };
     });
 
@@ -303,7 +304,10 @@ exports.updateApplicationStatus = async (req, res) => {
     }
 
     // 1️⃣ Load user
-    const user = await User.findByPk(userId);
+    const user = await User.findOne({
+      where: { id: userId }
+    });
+    
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }

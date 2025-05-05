@@ -17,6 +17,7 @@ const authMiddleware = require("../middleware/authMiddleware"); // Use the authe
 router.post("/register", authMiddleware, createUser);
 // router.get("/", authMiddleware, getData); // GET user data
 router.get("/:userId", getSpecificData); // GET user data
+router.get("/", getData); // GET user data
 router.put("/:userId", authMiddleware, updateUser); // PUT update user data
 router.delete("/", authMiddleware, deleteUser); // DELETE user account
 router.post("/:userId/apply", authMiddleware, addApplicant);
